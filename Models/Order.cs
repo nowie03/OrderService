@@ -12,5 +12,8 @@ namespace orderService.Models
 
         [Required]
         public int Quantity { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
     }
 }

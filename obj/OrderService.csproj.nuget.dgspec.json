@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hp\\source\\repos\\OrderService\\OrderService.csproj": {}
+    "C:\\Users\\hp\\source\\repos\\orderService\\OrderService.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hp\\source\\repos\\OrderService\\OrderService.csproj": {
+    "C:\\Users\\hp\\source\\repos\\orderService\\OrderService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hp\\source\\repos\\OrderService\\OrderService.csproj",
+        "projectUniqueName": "C:\\Users\\hp\\source\\repos\\orderService\\OrderService.csproj",
         "projectName": "OrderService",
-        "projectPath": "C:\\Users\\hp\\source\\repos\\OrderService\\OrderService.csproj",
+        "projectPath": "C:\\Users\\hp\\source\\repos\\orderService\\OrderService.csproj",
         "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hp\\source\\repos\\OrderService\\obj\\",
+        "outputPath": "C:\\Users\\hp\\source\\repos\\orderService\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config",
