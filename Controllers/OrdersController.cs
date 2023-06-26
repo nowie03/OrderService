@@ -118,9 +118,9 @@ namespace OrderService.Controllers
 
             try
             {
-                Message<Order> message = new Message<Order>(Constants.EventTypes.PAYMENT_INITIATED, order);
+               
 
-                _rabbitMQclient.SendMessage(message, Constants.EventTypes.PAYMENT_INITIATED);
+                _rabbitMQclient.SendMessage(order, Constants.EventTypes.PAYMENT_INITIATED);
 
                 return Ok(true);
 
