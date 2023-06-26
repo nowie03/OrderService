@@ -16,7 +16,7 @@ namespace OrderService
                 builder.Configuration.GetConnectionString("local-server")));
 
 
-            builder.Services.AddSingleton<IMessageBrokerClient, RabbitMQClient>();
+            builder.Services.AddScoped<IMessageBrokerClient, RabbitMQClient>();
 
 
 
