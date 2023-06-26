@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using orderService.Context;
 using orderService.Models;
+using OrderService.MessageBroker;
+using OrderService.Models;
 
 namespace OrderService.Controllers
 {
@@ -9,11 +11,13 @@ namespace OrderService.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ServiceContext _context;
+        private readonly IMessageBrokerClient _rabbitMQclient;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ServiceContext context, IServiceProvider serviceProvider)
         {
             _context = context;
+            _rabbitMQclient = serviceProvider.GetRequiredService<IMessageBrokerClient>();
         }
 
         // GET: api/Orders
@@ -85,10 +89,47 @@ namespace OrderService.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Orders'  is null.");
             }
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            try
+            {
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("checkout")]
+        public async Task<ActionResult<bool>> Checkout(int orderId)
+        {
+            if (_context.Orders == null)
+                return NoContent();
+
+            Order? order = await _context.Orders.FindAsync(orderId);
+
+            if (order == null)
+                return BadRequest($"oder with order id {orderId} could not be found");
+
+            try
+            {
+                Message<Order> message = new Message<Order>(Constants.EventTypes.PAYMENT_INITIATED, order);
+
+                _rabbitMQclient.SendMessage(message, Constants.EventTypes.PAYMENT_INITIATED);
+
+                return Ok(true);
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+
         }
 
         // DELETE: api/Orders/5
@@ -105,10 +146,18 @@ namespace OrderService.Controllers
                 return NotFound();
             }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
+            try
+            {
 
-            return NoContent();
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         private bool OrderExists(int id)

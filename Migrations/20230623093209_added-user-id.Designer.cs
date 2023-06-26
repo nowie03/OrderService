@@ -10,7 +10,7 @@ using orderService.Context;
 
 namespace orderService.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(ServiceContext))]
     [Migration("20230623093209_added-user-id")]
     partial class addeduserid
     {
