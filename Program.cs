@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using orderService.Context;
-
+using OrderService.BackgroundServices;
 using OrderService.MessageBroker;
 
 namespace OrderService
@@ -17,6 +17,10 @@ namespace OrderService
 
 
             builder.Services.AddScoped<IMessageBrokerClient, RabbitMQClient>();
+
+            builder.Services.AddSingleton<PublishMessageToQueue>();
+            builder.Services.AddHostedService<PublishMessageToQueue>(
+                provider => provider.GetRequiredService<PublishMessageToQueue>());
 
 
 

@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using orderService.Context;
+using OrderService.Constants;
 using OrderService.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -12,6 +15,7 @@ namespace OrderService.MessageBroker
         private IConnection _connection;
         private IModel _channel;
         private string _queueName = "service-queue";
+        private readonly IServiceProvider _serviceProvider;
 
 
 
@@ -22,6 +26,7 @@ namespace OrderService.MessageBroker
 
 
             SetupClient(serviceProvider);
+            _serviceProvider = serviceProvider;
 
         }
 
@@ -47,6 +52,10 @@ namespace OrderService.MessageBroker
                 _channel = _connection.CreateModel();
                 //declare the queue after mentioning name and a few property related to that
                 _channel.QueueDeclare(_queueName, exclusive: false);
+
+                _channel.ConfirmSelect();
+
+                _channel.BasicAcks += (sender, ea) => HandleMessageAcknowledge(ea.DeliveryTag, ea.Multiple);
             }
             catch(BrokerUnreachableException ex)
             {
@@ -55,17 +64,45 @@ namespace OrderService.MessageBroker
 
 
         }
-        public void SendMessage<T>(T message, string eventType)
+
+        private async void HandleMessageAcknowledge(ulong currentSequenceNumber, bool multiple)
+        {
+            try
+            {
+                if (multiple)
+                {
+                    var scope=_serviceProvider.CreateScope();
+
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ServiceContext>();
+
+                    await dbContext.Outbox
+                       .Where(order => order.SequenceNumber <= currentSequenceNumber)
+                        .ExecuteUpdateAsync(
+                        entity => entity.SetProperty(
+                            order => order.State,
+                            EventStates.EVENT_ACK_COMPLETED));
+
+                    await dbContext.SaveChangesAsync();
+
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        public void SendMessage(Message message)
         {
             if (_channel == null)
                 return;
 
-            //Serialize the message
+       
 
 
-            Message<T> eventMessage = new Message<T>(eventType, message);
+           
 
-            string json = JsonConvert.SerializeObject(eventMessage);
+            string json = JsonConvert.SerializeObject(message);
 
 
             var body = Encoding.UTF8.GetBytes(json);
@@ -77,6 +114,10 @@ namespace OrderService.MessageBroker
 
         }
 
-
+        public ulong GetNextSequenceNUmber()
+        {
+            
+            return _channel.NextPublishSeqNo;
+        }
     }
 }

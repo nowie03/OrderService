@@ -1,9 +1,11 @@
-﻿namespace OrderService.MessageBroker
+﻿using OrderService.Models;
+
+namespace OrderService.MessageBroker
 {
     public interface IMessageBrokerClient
     {
-        public void SendMessage<T>(T message, string eventType);
-
+        public void SendMessage(Message message);
+        public ulong GetNextSequenceNUmber();
 
     }
 }

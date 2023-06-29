@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using orderService.Models;
+using OrderService.Models;
 
 namespace orderService.Context
 {
@@ -8,5 +9,8 @@ namespace orderService.Context
         public ServiceContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Order> Orders { get; set; }
+
+
+        public DbSet<Message> Outbox { get; set; }
     }
 }

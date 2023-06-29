@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using orderService.Context;
 using orderService.Models;
 using OrderService.MessageBroker;
@@ -118,9 +119,12 @@ namespace OrderService.Controllers
 
             try
             {
-               
+                string serializedOrder = JsonConvert.SerializeObject(order);
+                ulong nextSequenceNumber = _rabbitMQclient.GetNextSequenceNUmber();
+                Message message = new(Constants.EventTypes.PAYMENT_INITIATED, serializedOrder, nextSequenceNumber, Constants.EventStates.EVENT_ACK_PENDING);
 
-                _rabbitMQclient.SendMessage(order, Constants.EventTypes.PAYMENT_INITIATED);
+                await _context.Outbox.AddAsync(message);
+                await _context.SaveChangesAsync();
 
                 return Ok(true);
 
