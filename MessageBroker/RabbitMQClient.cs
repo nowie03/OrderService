@@ -69,11 +69,11 @@ namespace OrderService.MessageBroker
         {
             try
             {
-                if (multiple)
-                {
                     var scope=_serviceProvider.CreateScope();
 
                     var dbContext = scope.ServiceProvider.GetRequiredService<ServiceContext>();
+                if (multiple)
+                {
 
                     await dbContext.Outbox
                        .Where(order => order.SequenceNumber <= currentSequenceNumber)
@@ -84,6 +84,18 @@ namespace OrderService.MessageBroker
 
                     await dbContext.SaveChangesAsync();
 
+                }
+
+
+                else
+                {
+                    Message? messageToBeUpdated = await dbContext.Outbox.FirstOrDefaultAsync(message => message.SequenceNumber == currentSequenceNumber);
+                    if (messageToBeUpdated != null)
+                    {
+                        messageToBeUpdated.State = EventStates.EVENT_ACK_COMPLETED;
+                    }
+
+                    await dbContext.SaveChangesAsync();
                 }
             }
             catch(Exception ex)
