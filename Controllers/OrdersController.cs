@@ -152,7 +152,6 @@ namespace OrderService.Controllers
 
             try
             {
-
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
 
