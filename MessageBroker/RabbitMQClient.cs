@@ -57,7 +57,7 @@ namespace OrderService.MessageBroker
 
                 _channel.BasicAcks += (sender, ea) => HandleMessageAcknowledge(ea.DeliveryTag, ea.Multiple);
             }
-            catch(BrokerUnreachableException ex)
+            catch (BrokerUnreachableException ex)
             {
                 Console.WriteLine(ex.ToString());
             }
@@ -69,9 +69,9 @@ namespace OrderService.MessageBroker
         {
             try
             {
-                    var scope=_serviceProvider.CreateScope();
+                var scope = _serviceProvider.CreateScope();
 
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ServiceContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ServiceContext>();
                 if (multiple)
                 {
 
@@ -98,7 +98,7 @@ namespace OrderService.MessageBroker
                     await dbContext.SaveChangesAsync();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
@@ -109,10 +109,10 @@ namespace OrderService.MessageBroker
             if (_channel == null)
                 return;
 
-       
 
 
-           
+
+
 
             string json = JsonConvert.SerializeObject(message);
 
@@ -128,7 +128,7 @@ namespace OrderService.MessageBroker
 
         public ulong GetNextSequenceNUmber()
         {
-            
+
             return _channel.NextPublishSeqNo;
         }
     }
