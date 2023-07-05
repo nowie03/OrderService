@@ -23,13 +23,13 @@ namespace OrderService.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrders(int userId)
         {
             if (_context.Orders == null)
             {
                 return NotFound();
             }
-            return await _context.Orders.AsNoTracking().ToListAsync();
+            return await _context.Orders.Where(order=>order.UserId==userId).AsNoTracking().ToListAsync();
         }
 
         // GET: api/Orders/5
